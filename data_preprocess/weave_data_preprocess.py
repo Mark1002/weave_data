@@ -1,3 +1,5 @@
+import pandas as pd
+
 class DeviceData:
     def __init__(self, device_id, report_time, 
                  device_type, machine_number):
@@ -61,12 +63,35 @@ class WeaveDataPreprocessService:
         '345100': 'WEAVE_STOP_CATCHING_COUNT'
     }
     
-    def fliter_divice_by_weave_feature(self, df):
+    def fliter_device_by_weave_feature(self, df):
         df['ATTRID'] = df['ATTRID'].astype('str')
         attr_list = list(self._attr_mapping_dict.keys())
         is_weave_attr = list(df['ATTRID'].isin(attr_list))
         return df.iloc[is_weave_attr,]
     
+    def get_attr_name(self, attr_id):
+        return self._attr_mapping_dict[attr_id]
+    
+    def perform_attr_mapping(self, df):
+        device_id_list = list((df.groupby('DEVICEID').size()).index)
+        attr_id_list = list((df.groupby('ATTRID').size()).index)
+        preprocess_df = pd.DataFrame()
+        
+        for device_id in device_id_list:
+            device_df = df[df['DEVICEID']==device_id]
+            for i in range(len(attr_id_list)):
+                attr_df = device_df[device_df['ATTRID']==attr_id_list[i]]
+                attr_name = self.get_attr_name(attr_id_list[i])
+                attr_df = attr_df.rename(columns={"VALUE": attr_name})
+                attr_df = attr_df.drop(columns=['LISTID', 'ATTRID'])
+                attr_df = attr_df.sort_values('REPORTTIME')
+                if i == 0:
+                    temp_df = attr_df
+                else:
+                    temp_df[attr_name] = attr_df[attr_name].values
+            preprocess_df = preprocess_df.append(temp_df, ignore_index=True)
+        return preprocess_df
+
     def merge_device_data(self, number_df, string_df):
         col_name = ['DEVICEID', 'REPORTTIME'] + list(self._attr_mapping_dict.values())
         device_data_list = number_df
