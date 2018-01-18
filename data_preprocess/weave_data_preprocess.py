@@ -88,11 +88,6 @@ class WeaveDataPreprocessService:
                 if i == 0:
                     temp_df = attr_df
                 else:
-                    temp_df[attr_name] = attr_df[attr_name].values
+                    temp_df = pd.merge(temp_df, attr_df, how='outer')
             preprocess_df = preprocess_df.append(temp_df, ignore_index=True)
         return preprocess_df
-
-    def merge_device_data(self, number_df, string_df):
-        col_name = ['DEVICEID', 'REPORTTIME'] + list(self._attr_mapping_dict.values())
-        device_data_list = number_df
-        return device_data_list
