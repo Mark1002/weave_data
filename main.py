@@ -6,9 +6,13 @@ Created on Tue Jan 16 15:52:16 2018
 """
 
 import pandas as pd
+import logging
 from data_preprocess.weave_data_preprocess import WeaveDataPreprocessService
 import os
 
+logging.basicConfig(level=logging.INFO)
+
+# 取得資料檔案路徑
 num_dir_path = 'D:/libon/VIEW_TEXTILE_NUMBER_DATA(2)'
 num_csv_list = os.listdir(num_dir_path)
 str_dir_path = 'D:/libon/VIEW_TEXTILE_STRING_DATA(2)'
@@ -35,4 +39,6 @@ number_df_preprocess = service.perform_attr_mapping(number_df)
 string_df_preprocess = service.perform_attr_mapping(string_df)
 
 merge_df = pd.merge(number_df_preprocess, string_df_preprocess, how='outer')
-merge_df = merge_df.dropna()
+# merge_df = merge_df.dropna()
+logging.info(merge_df.shape)
+merge_df.to_csv("data/output.csv")

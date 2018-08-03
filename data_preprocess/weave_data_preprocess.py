@@ -9,6 +9,7 @@ class DeviceData:
         self.machine_number = machine_number
 
 class WeaveDataPreprocessService:
+    # attrID 的對應
     _attr_mapping_dict = {
         '340100': 'WEAVE_MC_NO',
         '340200': 'WEAVE_CLOTH_NO',
@@ -73,6 +74,9 @@ class WeaveDataPreprocessService:
         return self._attr_mapping_dict[attr_id]
     
     def perform_attr_mapping(self, df):
+        """
+        用來做 attrId 的欄位轉換
+        """
         device_id_list = list((df.groupby('DEVICEID').size()).index)
         attr_id_list = list((df.groupby('ATTRID').size()).index)
         preprocess_df = pd.DataFrame()
